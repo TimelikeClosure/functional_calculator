@@ -1,0 +1,19 @@
+{
+  "name": "functional_calculator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./app.js",
+  "scripts": {
+    "test": "node ./tests/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TimelikeClosure/functional_calculator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TimelikeClosure/functional_calculator/issues"
+  },
+  "homepage": "https://github.com/TimelikeClosure/functional_calculator#readme"
+}
