@@ -1,4 +1,8 @@
 "use strict";
 const log = require("../public/index").log;
+const tests = require('./tests.json');
+const flattenTests = require('./flatten');
 
-log("I'm alive!");
+const flatTests = flattenTests(tests);
+
+console.log(flatTests);

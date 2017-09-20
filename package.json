@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/TimelikeClosure/functional_calculator/issues"
   },
-  "homepage": "https://github.com/TimelikeClosure/functional_calculator#readme"
+  "homepage": "https://github.com/TimelikeClosure/functional_calculator#readme",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  }
 }
