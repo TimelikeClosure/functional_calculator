@@ -25,7 +25,7 @@ function entryValue(entry){
 }
 
 function isTest(object){
-    return object.hasOwnProperty("input") && object.hasOwnProperty("output");
+    return object.hasOwnProperty("input") && object.hasOwnProperty("expected");
 }
 
 module.exports = flattenTests;
