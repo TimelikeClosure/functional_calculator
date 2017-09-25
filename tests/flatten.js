@@ -3,6 +3,7 @@ const flow = require("lodash/fp/flow");
 const entries = require("lodash/fp/entries");
 const map = require("lodash/fp/map");
 const flatten = require("lodash/fp/flatten");
+const isTest = require("./utils").isTest;
 
 function flattenTests(tests){
     return flow([
@@ -22,10 +23,6 @@ function flattenTests(tests){
 
 function entryValue(entry){
     return entry[1];
-}
-
-function isTest(object){
-    return object.hasOwnProperty("input") && object.hasOwnProperty("expected");
 }
 
 module.exports = flattenTests;

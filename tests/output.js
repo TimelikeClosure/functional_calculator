@@ -2,10 +2,12 @@
 const flow = require("lodash/fp/flow");
 const map = require("lodash/fp/map");
 
-function outputTestResults(stdOut){
-    return function(messages){
-        return map(stdOut)(messages);
+function outputMessages(stdOut){
+    return function (stdErr){
+        return function(messages){
+            return map(stdOut)(messages);
+        }
     }
 }
 
-module.exports = outputTestResults;
+module.exports = outputMessages;

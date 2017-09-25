@@ -1,7 +1,7 @@
 "use strict";
 const flow = require("lodash/fp/flow");
 
-function simple({input, expected, output, status}){
+function simple({id, input, expected, output, status}){
     return message(status)(input)(expected)(output);
 
     function message(status){
@@ -14,11 +14,11 @@ function simple({input, expected, output, status}){
                 );
                 
                 function passMessage(output){
-                    return `${status}\n\tInput: "${input}"`;
+                    return `${status} - ${id}`;
                 }
                 
                 function failMessage(output){
-                    return `${status}\n\tInput: "${input}"\n\tExpected output: "${expected}"\n\tActual output: "${output}"`;
+                    return `${status} - ${id}\n\tInput: "${input}"\n\tExpected output: "${expected}"\n\tActual output: "${output}"`;
                 }
             }
         }

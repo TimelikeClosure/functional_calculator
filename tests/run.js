@@ -1,6 +1,7 @@
 "use strict";
 const flow = require("lodash/fp/flow");
 const map = require("lodash/fp/map");
+const cloneExtend = require("./utils").cloneExtend;
 const assign = require("lodash/fp/assign");
 
 function runTests(testFunction){
@@ -22,17 +23,6 @@ function testStatusMap(test){
         testStatus(test.expected),
         cloneExtend(test)("status")
     ])(test.output);
-}
-
-function cloneExtend(originalObject){
-    return function(newKey){
-        return function(newValue){
-            return flow([
-                assign(originalObject),
-                assign({[newKey]: newValue})
-            ])({});
-        }
-    }
 }
 
 function testStatus(expectedOutput){
