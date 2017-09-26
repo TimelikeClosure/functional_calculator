@@ -8,25 +8,37 @@ if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
 
 function calculate(input){
     return _.flow([
-        _.reduce(removeLeadingZeros)([""]),
-        _.reduce(combineDigits)([""])
+        operandReduce,
+        operatorReduce
     ])(input);
 }
 
-function removeLeadingZeros(prev, curr){
-    return `${_.last(prev)}` !== "0" || isNaN(curr)
-    ? [...prev, curr]
-    : [
-        ...(_.dropRight(1)(prev)),
-        curr
-    ];
+function operandReduce(input){
+    return _.reduce(function(prev, curr){
+        return [
+            ...(_.dropRight(1)(prev)),
+            ...(operandPairReduce(_.last(prev), curr))
+        ];
+    })(["0"])(input);
 }
 
-function combineDigits(prev, curr){
-    return isNaN(curr) || isNaN(prev)
-    ? [...prev, curr]
-    : [
-        ...(_.dropRight(1)(prev)),
-        _.last(prev) + curr
-    ];
+function operandPairReduce(prev, curr){
+    return curr === "."
+    ? (
+        isNaN(prev)
+        ? [prev, `0${curr}`]
+        : /\./.test(prev)
+        ? [prev]
+        : [prev + curr]
+    )
+    : isNaN(curr)
+    ? [prev, curr]
+    : `${prev}` === "0"
+    ? [curr]
+    : [prev + curr];
 }
+
+function operatorReduce(input){
+    return input;
+}
+
