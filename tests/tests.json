@@ -1,17 +1,5 @@
 {
     "single_characters": {
-        "non_zero": {
-            "input": "1",
-            "expected": "1"
-        },
-        "zero": {
-            "input": "0",
-            "expected": "0"
-        },
-        "decimal": {
-            "input": ".",
-            "expected": "0."
-        },
         "unary_op": {
             "input": null,
             "expected": null
@@ -25,12 +13,20 @@
             "expected": "0"
         }
     },
-    "multi_digit_numbers": {
+    "numbers": {
         "integers": {
             "non_negative": {
-                "non_zero": {
+                "single_digit_non_zero": {
+                    "input": "1",
+                    "expected": "1"
+                },
+                "multi_digit_non_zero": {
                     "input": "123",
                     "expected": "123"
+                },
+                "zero": {
+                    "input": "0",
+                    "expected": "0"
                 },
                 "leading_zero": {
                     "input": "0023",
@@ -47,7 +43,11 @@
             }
         },
         "floats": {
-            "normal_decimal": {
+            "decimal": {
+                "input": ".",
+                "expected": "0."
+            },
+            "decimal_number": {
                 "input": "12.34",
                 "expected": "12.34"
             },

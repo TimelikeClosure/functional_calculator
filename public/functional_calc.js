@@ -6,36 +6,60 @@ if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
     };
 }
 
-function calculate(input){
+function calculate(inputs){
     return _.flow([
         operandReduce,
         operatorReduce
-    ])(input);
+    ])(inputs);
 }
 
-function operandReduce(input){
+function operandReduce(inputs){
     return _.reduce(function(prev, curr){
         return [
             ...(_.dropRight(1)(prev)),
-            ...(operandPairReduce(_.last(prev), curr))
+            ...(operandPairReduce(curr)(_.last(prev)))
         ];
-    })(["0"])(input);
+    })(["0"])(inputs);
 }
 
-function operandPairReduce(prev, curr){
-    return curr === "."
-    ? (
-        isNaN(prev)
+function operandPairReduce(curr){
+    return (
+        isDecimal(curr)
+        ? decimalReduce
+        : isNumber(curr)
+        ? numberReduce
+        : nonOperandReduce
+    );
+
+    function isDecimal(curr){
+        return curr.length === 1 && hasDecimal(curr);
+    }
+
+    function decimalReduce(prev){
+        return !isNumber(prev)
         ? [prev, `0${curr}`]
-        : /\./.test(prev)
+        : hasDecimal(prev)
         ? [prev]
         : [prev + curr]
-    )
-    : isNaN(curr)
-    ? [prev, curr]
-    : `${prev}` === "0"
-    ? [curr]
-    : [prev + curr];
+    }
+    
+    function hasDecimal(operation){
+        return /\./.test(operation);
+    }
+
+    function isNumber(curr){
+        return !isNaN(curr);
+    }
+
+    function numberReduce(prev){
+        return `${prev}` === "0"
+        ? [curr]
+        : [prev + curr];
+    }
+
+    function nonOperandReduce(prev){
+        return [prev, curr];
+    }
 }
 
 function operatorReduce(input){
