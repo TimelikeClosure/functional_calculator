@@ -3,6 +3,7 @@ const flow = require("lodash/fp/flow");
 const map = require("lodash/fp/map");
 const cloneExtend = require("./utils").cloneExtend;
 const assign = require("lodash/fp/assign");
+const isEqual = require("lodash/fp/isEqual");
 
 function runTests(testFunction){
     return flow([
@@ -28,7 +29,7 @@ function testStatusMap(test){
 function testStatus(expectedOutput){
     return function(actualOutput){
         return (
-            actualOutput === expectedOutput
+            isEqual(expectedOutput)(actualOutput)
             ? "PASS"
             : "FAIL"
         );

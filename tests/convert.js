@@ -10,7 +10,7 @@ function propToCmds(prop){
             getCmds,
             cloneExtend(test)(prop)
         ])(test[prop]);
-    }
+    };
 }
 
 function getCmds(stream){
@@ -22,6 +22,25 @@ function getCmds(stream){
     }
 }
 
+function propToOutput(prop){
+    return function(test){
+        return flow([
+            getOutput,
+            cloneExtend(test)(prop)
+        ])(test[prop]);
+    };
+}
+
+function getOutput(stream){
+    switch (typeof stream){
+        case "string":
+            return [stream];
+        default:
+            return stream;
+    }
+}
+
 module.exports = {
-    propToCmds: propToCmds
+    propToCmds: propToCmds,
+    propToOutput: propToOutput
 };

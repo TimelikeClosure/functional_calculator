@@ -25,6 +25,58 @@
             "expected": "0"
         }
     },
+    "multi_digit_numbers": {
+        "integers": {
+            "non_negative": {
+                "non_zero": {
+                    "input": "123",
+                    "expected": "123"
+                },
+                "leading_zero": {
+                    "input": "0023",
+                    "expected": "23"
+                },
+                "trailing_zero": {
+                    "input": "1230",
+                    "expected": "1230"
+                },
+                "all_zero": {
+                    "input": "0000",
+                    "expected": "0"
+                }
+            }
+        },
+        "floats": {
+            "normal_decimal": {
+                "input": "12.34",
+                "expected": "12.34"
+            },
+            "trailing_decimal": {
+                "input": "12.",
+                "expected": "12."
+            },
+            "trailing_zero": {
+                "input": "12.300",
+                "expected": "12.300"
+            },
+            "leading_zero_float": {
+                "input": "0.123",
+                "expected": "0.123"
+            },
+            "leading_point_float": {
+                "input": ".123",
+                "expected": "0.123"
+            },
+            "consecutive_decimals": {
+                "input": "1...23",
+                "expected": "1.23"
+            },
+            "non_consecutive_decimals": {
+                "input": "1.2.3",
+                "expected": "1.23"
+            }
+        }
+    },
     "single_operations": {
         "addition": {
             "input": "1+2=",
