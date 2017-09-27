@@ -47,22 +47,41 @@ function operandPairReduce(curr){
         return /\./.test(operation);
     }
 
-    function isNumber(curr){
-        return !isNaN(curr);
-    }
-
     function numberReduce(prev){
-        return `${prev}` === "0"
-        ? [curr]
-        : [prev + curr];
+        return (
+            !isNumber(prev)
+            ? [prev, curr]
+            : `${prev}` === "0"
+            ? [curr]
+            : [prev + curr]
+        );
     }
+    
+        function isNumber(input){
+            return !isNaN(input);
+        }
 
     function nonOperandReduce(prev){
         return [prev, curr];
     }
 }
 
-function operatorReduce(input){
-    return input;
+function operatorReduce(inputs){
+    return _.reduce(function(prev, curr){
+        return [
+            ...(_.dropRight(1)(prev)),
+            ...(operatorPairReduce(curr)(_.last(prev)))
+        ];
+    })([])(inputs);
+}
+
+function operatorPairReduce(curr){
+    return function(prev){
+        return (
+            prev
+            ? [prev, curr]
+            : [curr]
+        );
+    }
 }
 
