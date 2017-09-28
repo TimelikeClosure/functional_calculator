@@ -2,7 +2,7 @@
 if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
     var _ = _ || require("lodash/fp");
     module.exports = {
-        inputsToOperations: inputsToOperations,
+        reduce: inputsToOperations,
         calculate: calculate
     };
 }

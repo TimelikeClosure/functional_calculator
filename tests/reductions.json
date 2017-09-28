@@ -1,17 +1,7 @@
 {
-    "single_characters": {
-        "unary_op": {
-            "input": null,
-            "expected": null
-        },
-        "binary_op": {
-            "input": "+",
-            "expected": "0+"
-        },
-        "evaluation": {
-            "input": "=",
-            "expected": "0"
-        }
+    "empty": {
+        "input": "",
+        "expected": "0"
     },
     "operands": {
         "integers": {
@@ -107,86 +97,6 @@
                 "input": "1.+2",
                 "expected": ["1", "+", "2"]
             }
-        }
-    },
-    "single_operations": {
-        "addition": {
-            "input": "1+2=",
-            "expected": "3"
-        },
-        "subtraction": {
-            "input": "1-2=",
-            "expected": "-1"
-        },
-        "multiplication": {
-            "input": "1*2=",
-            "expected": "2"
-        },
-        "division": {
-            "input": "1/2=",
-            "expected": "0.5"
-        }
-    },
-    "comprehensive_operations": {
-        "successive_operation": {
-            "input": "1+1+2=",
-            "expected": "4"
-        },
-        "decimals": {
-            "input": "1.1+1.1=",
-            "expected": "2.2"
-        },
-        "multiple_decimals": {
-            "input": "1...1+1...1=",
-            "expected": "2.2"
-        },
-        "multiple_operation_keys": {
-            "input": "1++++2=",
-            "expected": "3"
-        },
-        "changing_operation_keys": {
-            "input": "1+-*2=",
-            "expected": "2"
-        },
-        "operation_repeat": {
-            "input": "1+1===",
-            "expected": "4"
-        },
-        "operation_rollover": {
-            "input": "1+1+=+=",
-            "expected": "8"
-        },
-        "division_by_zero": {
-            "input": "1/0=",
-            "expected": "NaN"
-        }
-    },
-    "advanced_ops": {
-        "premature_operation": {
-            "input": "++++1*3=",
-            "expected": "3"
-        },
-        "partial_operand": {
-            "input": "3*=",
-            "expected": "9"
-        },
-        "missing_operation": {
-            "input": "3=",
-            "expected": "3"
-        },
-        "missing_operands": {
-            "input": "====",
-            "expected": "0"
-        }
-    },
-    "extra_operations": {
-        "order_of_ops": {
-            "input": "1+3/4+10*2=",
-            "expected": "21.75"
-        },
-        "binary_math_rounding": {
-            "input": "0.1+0.2=",
-            "expected": "0.3"
         }
     }
 }
