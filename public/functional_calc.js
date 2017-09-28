@@ -2,11 +2,19 @@
 if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
     var _ = _ || require("lodash/fp");
     module.exports = {
+        inputsToOperations: inputsToOperations,
         calculate: calculate
     };
 }
 
 function calculate(inputs){
+    return _.flow([
+        inputsToOperations,
+        evaluateOperations
+    ])(inputs);
+}
+
+function inputsToOperations(inputs){
     return _.flow([
         operandReduce,
         operatorReduce
@@ -116,6 +124,10 @@ function removeOperandTail(operand){
         Number,
         String
     ])(operand);
+}
+
+function evaluateOperations(operations){
+    return operations;
 }
 
 function isDecimal(operation){
