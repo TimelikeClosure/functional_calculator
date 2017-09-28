@@ -76,12 +76,64 @@ function operatorReduce(inputs){
 }
 
 function operatorPairReduce(curr){
-    return function(prev){
+    return (
+        isBinaryOp(curr)
+        ? binaryOperatorReduce
+        : isUnaryOp(curr)
+        ? unaryOperatorReduce
+        : nonOperatorReduce
+    );
+
+    function binaryOperatorReduce(prev){
         return (
-            prev
-            ? [prev, curr]
-            : [curr]
+            _.isUndefined(prev)
+            ? ["0", curr]
+            : isBinaryOp(prev)
+            ? [curr]
+            : [prev, curr]
+        );
+    }
+
+    function unaryOperatorReduce(prev){
+        return (
+            _.isUndefined(prev)
+            ? ["0", curr]
+            : [prev, curr]
+        );
+    }
+
+    function nonOperatorReduce(prev){
+        return (
+            _.isUndefined(prev)
+            ? [curr]
+            : [prev, curr]
         );
     }
 }
 
+function removeOperandTail(operand){
+    return _.flow([
+        Number,
+        String
+    ])(operand);
+}
+
+function isDecimal(operation){
+    return operation.length === 1 && hasDecimal(operation);
+}
+
+function hasDecimal(operation){
+    return /\./.test(operation);
+}
+
+function isNumber(input){
+    return !isNaN(input);
+}
+
+function isBinaryOp(input){
+    return _.includes(input)(["+", "-", "*", "/"]);
+}
+
+function isUnaryOp(input){
+    return _.includes(input)([]);
+}
