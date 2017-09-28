@@ -24,13 +24,13 @@ unit = require("../public/functional_calc").calculate;
 tests = require('./evaluations.json');
 unitTests(unit)(tests);
 
-function unitTests(func){
+function unitTests(unit){
     return flow([
         mapTestIds(),
         flattenTests,
         map(propToCmds("input")),
         map(propToOutput("expected")),
-        runTests(func),
+        runTests(unit),
         map(formatOutput),
         outputTestMessages(console.info)(console.error)
     ]);
