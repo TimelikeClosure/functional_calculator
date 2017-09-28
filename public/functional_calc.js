@@ -19,7 +19,7 @@ function operandReduce(inputs){
             ...(_.dropRight(1)(prev)),
             ...(operandPairReduce(curr)(_.last(prev)))
         ];
-    })(["0"])(inputs);
+    })([])(inputs);
 }
 
 function operandPairReduce(curr){
@@ -31,38 +31,38 @@ function operandPairReduce(curr){
         : nonOperandReduce
     );
 
-    function isDecimal(curr){
-        return curr.length === 1 && hasDecimal(curr);
-    }
-
     function decimalReduce(prev){
-        return !isNumber(prev)
-        ? [prev, `0${curr}`]
-        : hasDecimal(prev)
-        ? [prev]
-        : [prev + curr]
+        return (
+            _.isUndefined(prev)
+            ? [`0${curr}`]
+            : !isNumber(prev)
+            ? [prev, `0${curr}`]
+            : hasDecimal(prev)
+            ? [prev]
+            : [prev + curr]
+        );
     }
     
-    function hasDecimal(operation){
-        return /\./.test(operation);
-    }
-
     function numberReduce(prev){
         return (
-            !isNumber(prev)
+            _.isUndefined(prev)
+            ? [curr]
+            : !isNumber(prev)
             ? [prev, curr]
             : `${prev}` === "0"
             ? [curr]
             : [prev + curr]
         );
     }
-    
-        function isNumber(input){
-            return !isNaN(input);
-        }
 
     function nonOperandReduce(prev){
-        return [prev, curr];
+        return (
+            _.isUndefined(prev)
+            ? [curr]
+            : isNumber(prev)
+            ? [removeOperandTail(prev), curr]
+            : [prev, curr]
+        );
     }
 }
 

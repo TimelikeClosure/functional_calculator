@@ -13,7 +13,7 @@
             "expected": "0"
         }
     },
-    "numbers": {
+    "operands": {
         "integers": {
             "non_negative": {
                 "single_digit_non_zero": {
@@ -52,12 +52,12 @@
                 "expected": "12.34"
             },
             "trailing_decimal": {
-                "input": "12.",
-                "expected": "12."
+                "input": "12.+34.",
+                "expected": ["12", "+", "34."]
             },
             "trailing_zero": {
-                "input": "12.300",
-                "expected": "12.300"
+                "input": "12.300+45.600",
+                "expected": ["12.3", "+", "45.600"]
             },
             "leading_zero_float": {
                 "input": "0.123",
