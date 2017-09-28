@@ -16,21 +16,21 @@ function calculate(inputs){
 
 function inputsToOperations(inputs){
     return _.flow([
-        operandReduce,
-        operatorReduce
+        reduceInputs(operandReducer),
+        reduceInputs(operatorReducer)
     ])(inputs);
 }
 
-function operandReduce(inputs){
+function reduceInputs(reducer){
     return _.reduce(function(prev, curr){
         return [
             ...(_.dropRight(1)(prev)),
-            ...(operandPairReduce(curr)(_.last(prev)))
+            ...(reducer(curr)(_.last(prev)))
         ];
-    })([])(inputs);
+    })([]);
 }
 
-function operandPairReduce(curr){
+function operandReducer(curr){
     return (
         isDecimal(curr)
         ? decimalReduce
@@ -74,16 +74,7 @@ function operandPairReduce(curr){
     }
 }
 
-function operatorReduce(inputs){
-    return _.reduce(function(prev, curr){
-        return [
-            ...(_.dropRight(1)(prev)),
-            ...(operatorPairReduce(curr)(_.last(prev)))
-        ];
-    })([])(inputs);
-}
-
-function operatorPairReduce(curr){
+function operatorReducer(curr){
     return (
         isBinaryOp(curr)
         ? binaryOperatorReduce
