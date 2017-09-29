@@ -17,7 +17,8 @@ function calculate(inputs){
 function inputsToOperations(inputs){
     return _.flow([
         reduceInputs(operandReducer),
-        reduceInputs(operatorReducer)
+        reduceInputs(operatorReducer),
+        reduceInputs(groupReducer)
     ])(inputs);
 }
 
@@ -33,13 +34,13 @@ function reduceInputs(reducer){
 function operandReducer(curr){
     return (
         isDecimal(curr)
-        ? decimalReduce
+        ? decimalReducer
         : isNumber(curr)
-        ? numberReduce
-        : nonOperandReduce
+        ? numberReducer
+        : nonOperandReducer
     );
 
-    function decimalReduce(prev){
+    function decimalReducer(prev){
         return (
             _.isUndefined(prev)
             ? [`0${curr}`]
@@ -50,8 +51,8 @@ function operandReducer(curr){
             : [prev + curr]
         );
     }
-    
-    function numberReduce(prev){
+
+    function numberReducer(prev){
         return (
             _.isUndefined(prev)
             ? [curr]
@@ -63,7 +64,7 @@ function operandReducer(curr){
         );
     }
 
-    function nonOperandReduce(prev){
+    function nonOperandReducer(prev){
         return (
             _.isUndefined(prev)
             ? [curr]
@@ -77,23 +78,25 @@ function operandReducer(curr){
 function operatorReducer(curr){
     return (
         isBinaryOp(curr)
-        ? binaryOperatorReduce
+        ? binaryOperatorReducer
         : isUnaryOp(curr)
-        ? unaryOperatorReduce
-        : nonOperatorReduce
+        ? unaryOperatorReducer
+        : nonOperatorReducer
     );
 
-    function binaryOperatorReduce(prev){
+    function binaryOperatorReducer(prev){
         return (
             _.isUndefined(prev)
             ? ["0", curr]
+            : isGroupStart(prev)
+            ? [prev, "0", curr]
             : isBinaryOp(prev)
             ? [curr]
             : [prev, curr]
         );
     }
 
-    function unaryOperatorReduce(prev){
+    function unaryOperatorReducer(prev){
         return (
             _.isUndefined(prev)
             ? ["0", curr]
@@ -101,7 +104,59 @@ function operatorReducer(curr){
         );
     }
 
-    function nonOperatorReduce(prev){
+    function nonOperatorReducer(prev){
+        return (
+            _.isUndefined(prev)
+            ? [curr]
+            : [prev, curr]
+        );
+    }
+}
+
+function groupReducer(curr){
+    return (
+        isGroupStart(curr)
+        ? groupStartReducer
+        : isGroupEnd(curr)
+        ? groupEndReducer
+        : isOperand(curr)
+        ? operandReducer
+        : nonGroupReducer
+    );
+
+    function groupStartReducer(prev){
+        return (
+            _.isUndefined(prev)
+            ? [curr]
+            : isOperand(prev) || isGroupEnd(prev)
+            ? [prev, "*", curr]
+            : [prev, curr]
+        );
+    }
+
+    function groupEndReducer(prev){
+        return (
+            _.isUndefined(prev)
+            ? [curr]
+            : isGroupStart(prev)
+            ? [prev, "0", curr]
+            : isBinaryOp(prev)
+            ? [prev, "0", curr]
+            : [prev, curr]
+        );
+    }
+
+    function operandReducer(prev){
+        return (
+            _.isUndefined(prev)
+            ? [curr]
+            : isGroupEnd(prev)
+            ? [prev, "*", curr]
+            : [prev, curr]
+        );
+    }
+
+    function nonGroupReducer(prev){
         return (
             _.isUndefined(prev)
             ? [curr]
@@ -129,6 +184,10 @@ function hasDecimal(operation){
     return /\./.test(operation);
 }
 
+function isOperand(input){
+    return isNumber(input);
+}
+
 function isNumber(input){
     return !isNaN(input);
 }
@@ -139,4 +198,12 @@ function isBinaryOp(input){
 
 function isUnaryOp(input){
     return _.includes(input)([]);
+}
+
+function isGroupStart(input){
+    return _.includes(input)(["("]);
+}
+
+function isGroupEnd(input){
+    return _.includes(input)([")"]);
 }
