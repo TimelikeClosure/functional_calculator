@@ -18,11 +18,11 @@ unit = require("../public/functional_calc").reduce;
 tests = require('./reductions.json');
 unitTests(unit)(tests);
 
-console.log("\n===== EVALUATION TESTS =====\n");
+// console.log("\n===== EVALUATION TESTS =====\n");
 
-unit = require("../public/functional_calc").calculate;
-tests = require('./evaluations.json');
-unitTests(unit)(tests);
+// unit = require("../public/functional_calc").calculate;
+// tests = require('./evaluations.json');
+// unitTests(unit)(tests);
 
 function unitTests(unit){
     return flow([
