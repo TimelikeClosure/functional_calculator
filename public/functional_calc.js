@@ -16,15 +16,15 @@ function calculate(inputs){
 
 function inputsReducer(inputs){
     return _.flow([
-        reduceInputs(operandReducer),
-        reduceInputs(operatorReducer),
-        reduceInputs(groupReducer),
+        reduceInputsByPairs(operandReducer),
+        reduceInputsByPairs(operatorReducer),
+        reduceInputsByPairs(groupReducer),
         groupBalancer,
         emptyReducer
     ])(inputs);
 }
 
-function reduceInputs(reducer){
+function reduceInputsByPairs(reducer){
     return _.reduce(function(prev, curr){
         return [
             ...(_.dropRight(1)(prev)),
@@ -168,7 +168,56 @@ function groupReducer(curr){
 }
 
 function groupBalancer(inputs){
-    return inputs;
+    return _.flow([
+        groupByDelimiters(["="]),
+        _.reduce((prev, curr) => (
+            _.isArray(curr)
+            ? [...prev, groupFloorReducer(curr)]
+            : isEvaluate(curr)
+            ? [
+                ...(_.dropRight(1)(prev)),
+                groupCeilingReducer(_.last(prev)),
+                curr
+            ]
+            : [...prev, curr]
+        ))([]),
+        _.flatten
+    ])(inputs);
+}
+
+function groupByDelimiters(delimiters){
+    return _.reduce(function(prev, curr){
+        return (
+            _.includes(curr)(delimiters)
+            ? [
+                ..._.cloneDeep(prev),
+                curr,
+                []
+            ]
+            : [
+                ...(_.dropRight(1)(_.cloneDeep(prev))),
+                [
+                    ...(_.last(prev)),
+                    curr
+                ]
+            ]
+        );
+    })([[]]);
+}
+
+function groupFloorReducer(inputs){
+    return _.reduce((prev, curr) => (
+        curr === ")" && groupDepth(prev) === 0
+        ? ["(", ...prev, curr]
+        : [...prev, curr]
+    ))([])(inputs);
+}
+
+function groupCeilingReducer(inputs){
+    return [
+        ...inputs,
+        ...((new Array(groupDepth(inputs))).fill(")"))
+    ];
 }
 
 function emptyReducer(inputs){
@@ -177,6 +226,10 @@ function emptyReducer(inputs){
         ? inputs
         : ["0"]
     );
+}
+
+function groupDepth(inputs){
+    return (_.countBy(isGroupStart)(inputs)[true] || 0) - (_.countBy(isGroupEnd)(inputs)[true] || 0);
 }
 
 function removeOperandTail(operand){
@@ -220,4 +273,8 @@ function isGroupStart(input){
 
 function isGroupEnd(input){
     return _.includes(input)([")"]);
+}
+
+function isEvaluate(input){
+    return _.includes(input)(["="]);
 }
