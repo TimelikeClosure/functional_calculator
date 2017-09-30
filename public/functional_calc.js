@@ -2,23 +2,24 @@
 if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
     var _ = _ || require("lodash/fp");
     module.exports = {
-        reduce: inputReducer,
+        reduce: inputsReducer,
         calculate: calculate
     };
 }
 
 function calculate(inputs){
     return _.flow([
-        inputReducer,
-        evaluateOperations
+        inputsReducer,
+        operationsEvaluator
     ])(inputs);
 }
 
-function inputReducer(inputs){
+function inputsReducer(inputs){
     return _.flow([
         reduceInputs(operandReducer),
         reduceInputs(operatorReducer),
         reduceInputs(groupReducer),
+        groupBalancer,
         emptyReducer
     ])(inputs);
 }
@@ -166,6 +167,10 @@ function groupReducer(curr){
     }
 }
 
+function groupBalancer(inputs){
+    return inputs;
+}
+
 function emptyReducer(inputs){
     return (
         _.size(inputs)
@@ -181,7 +186,7 @@ function removeOperandTail(operand){
     ])(operand);
 }
 
-function evaluateOperations(operations){
+function operationsEvaluator(operations){
     return operations;
 }
 
