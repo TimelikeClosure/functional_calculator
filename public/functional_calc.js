@@ -256,7 +256,9 @@ function operationsEvaluator(operations){
 
 function evaluateExpression(expression){
     return (
-        expression.length === 1
+        expression.length === 0
+        ? ["0"]
+        : expression.length === 1
         ? expression
         : evaluateSubExpression(expression)
     );
