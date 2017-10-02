@@ -78,7 +78,7 @@
         },
         "division_by_zero": {
             "input": "1/0=",
-            "expected": "NaN"
+            "expected": "Infinity"
         }
     },
     "advanced_ops": {
