@@ -318,7 +318,7 @@ function evaluateSingleOperation(operator){
     );
 
     function evaluateSingleBinaryOperation(operand1){
-        return function(operand2){
+        return function(operand2 = operand1){
             return String(
                 isAddition(operator)
                 ? Number(operand1) + Number(operand2)
