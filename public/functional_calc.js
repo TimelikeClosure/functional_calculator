@@ -245,7 +245,97 @@ function removeOperandTail(operand){
 }
 
 function operationsEvaluator(operations){
-    return operations;
+    return _.reduce(function(prev, curr){
+        return (
+            isEvaluate(curr)
+            ? [...evaluateExpression(prev)]
+            : [...prev, curr]
+        );
+    })([])(operations);
+}
+
+function evaluateExpression(expression){
+    return (
+        expression.length === 1
+        ? expression
+        : evaluateSubExpression(expression)
+    );
+}
+
+function evaluateSubExpression(expression){
+    return evaluateExpression(
+        expressionHasOpType(isGroupBoundary)(expression)
+        ? evaluateSubGroup(expression)
+        : expressionHasOpType(isMultDivOp)(expression)
+        ? evaluateSubOpType(isMultDivOp)(expression)
+        : expressionHasOpType(isAddSubOp)(expression)
+        ? evaluateSubOpType(isAddSubOp)(expression)
+        : [NaN]
+    );
+}
+
+function evaluateSubGroup(expression){
+    const groupEndIndex = _.findIndex(isGroupEnd)(expression);
+    const groupStartIndex = _.findLastIndex(isGroupStart)(
+        _.slice(0)(groupEndIndex)(expression)
+    );
+    return [
+        ...(_.slice(0)(groupStartIndex)(expression)),
+        ...evaluateExpression(_.slice(groupStartIndex+1)(groupEndIndex)(expression)),
+        ...(_.slice(groupEndIndex+1)(expression.length)(expression))
+    ];
+}
+
+function expressionHasOpType(opTest){
+    return function(expression){
+        return _.findIndex(opTest)(expression) !== -1;
+    };
+}
+
+function evaluateSubOpType(opTest){
+    return function(expression){
+        const opIndex = _.findIndex(opTest)(expression);
+        const op = expression[opIndex];
+        return (
+            isBinaryOp(op)
+            ? [
+                ...(_.slice(0)(opIndex - 1)(expression)),
+                evaluateSingleOperation(op)(expression[opIndex - 1])(expression[opIndex + 1]),
+                ...(_.slice(opIndex + 2)(expression.length)(expression))
+            ]
+            : expression
+        );
+    }
+}
+
+function evaluateSingleOperation(operator){
+    return (
+        isBinaryOp(operator)
+        ? evaluateSingleBinaryOperation
+        : evaluateSingleUnaryOperation
+    );
+
+    function evaluateSingleBinaryOperation(operand1){
+        return function(operand2){
+            return String(
+                isAddition(operator)
+                ? Number(operand1) + Number(operand2)
+                : isSubtraction(operator)
+                ? Number(operand1) - Number(operand2)
+                : isMultiplication(operator)
+                ? Number(operand1) * Number(operand2)
+                : isDivision(operator)
+                ? Number(operand1) / Number(operand2)
+                : NaN
+            );
+        };
+    }
+
+    function evaluateSingleUnaryOperation(operand){
+        return (
+            NaN
+        );
+    }
 }
 
 function isDecimal(operation){
@@ -265,11 +355,39 @@ function isNumber(input){
 }
 
 function isBinaryOp(input){
-    return _.includes(input)(["+", "-", "*", "/"]);
+    return isAddSubOp(input) || isMultDivOp(input);
 }
 
 function isUnaryOp(input){
     return _.includes(input)([]);
+}
+
+function isAddSubOp(input){
+    return isAddition(input) || isSubtraction(input);
+}
+
+function isAddition(input){
+    return _.includes(input)(["+"]);
+}
+
+function isSubtraction(input){
+    return _.includes(input)(["-"]);
+}
+
+function isMultDivOp(input){
+    return isMultiplication(input) || isDivision(input);
+}
+
+function isMultiplication(input){
+    return _.includes(input)(["*"]);
+}
+
+function isDivision(input){
+    return _.includes(input)(["/"]);
+}
+
+function isGroupBoundary(input){
+    return isGroupStart(input) || isGroupEnd(input);
 }
 
 function isGroupStart(input){

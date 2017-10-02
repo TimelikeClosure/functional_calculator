@@ -12,17 +12,17 @@ const outputTestMessages = require("./output");
 let unit;
 let tests;
 
-console.log("\n===== REDUCTION TESTS =====\n");
+// console.log("\n===== REDUCTION TESTS =====\n");
 
-unit = require("../public/functional_calc").reduce;
-tests = require('./reductions.json');
-unitTests(unit)(tests);
-
-// console.log("\n===== EVALUATION TESTS =====\n");
-
-// unit = require("../public/functional_calc").calculate;
-// tests = require('./evaluations.json');
+// unit = require("../public/functional_calc").reduce;
+// tests = require('./reductions.json');
 // unitTests(unit)(tests);
+
+console.log("\n===== EVALUATION TESTS =====\n");
+
+unit = require("../public/functional_calc").calculate;
+tests = require('./evaluations.json');
+unitTests(unit)(tests);
 
 function unitTests(unit){
     return flow([

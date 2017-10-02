@@ -1,4 +1,28 @@
 {
+    "single_evaluation": {
+        "single_operations": {
+            "addition": {
+                "input": "1+2=",
+                "expected": ["3"]
+            },
+            "subtraction": {
+                "input": "1-2=",
+                "expected": "-1"
+            },
+            "multiplication": {
+                "input": "1*2=",
+                "expected": "2"
+            },
+            "division": {
+                "input": "1/2=",
+                "expected": "0.5"
+            }
+        },
+        "grouping": {
+            "input": "3*(1+2)=",
+            "expected": "9"
+        }
+    },
     "single_characters": {
         "evaluation": {
             "input": "=",
