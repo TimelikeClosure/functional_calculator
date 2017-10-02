@@ -58,11 +58,16 @@ function operandReducer(curr){
         return (
             _.isUndefined(prev)
             ? [curr]
-            : !isNumber(prev)
-            ? [prev, curr]
             : `${prev}` === "0"
             ? [curr]
-            : [prev + curr]
+            : isNumber(prev) && hasDecimal(prev)
+            ? [prev + _.flow([
+                _.split("."),
+                _.join("")
+            ])(curr)]
+            : isNumber(prev)
+            ? [prev + curr]
+            : [prev, curr]
         );
     }
 
