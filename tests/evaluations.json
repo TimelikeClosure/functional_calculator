@@ -45,8 +45,14 @@
             }
         },
         "grouping": {
-            "input": "3*(1+2)=",
-            "expected": "9"
+            "grouping": {
+                "input": "3*(1+2)=",
+                "expected": "9"
+            },
+            "post_evaluation_implied_operation": {
+                "input": ["5", "=", "("],
+                "expected": ["5", "*", "("]
+            }
         },
         "advanced_ops": {
             "premature_operation": {
