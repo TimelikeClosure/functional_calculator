@@ -77,11 +77,15 @@
                 "input": "1+2",
                 "expected": ["1", "+", "2"]
             },
-            "repeated": {
+            "multiple": {
+                "input": "1+2+3+4",
+                "expected": ["1", "+", "2", "+", "3", "+", "4"]
+            },
+            "repeated_operator": {
                 "input": "1+++2",
                 "expected": ["1", "+", "2"]
             },
-            "changing": {
+            "changing_operator": {
                 "input": "1+-*2",
                 "expected": ["1", "*", "2"]
             },
