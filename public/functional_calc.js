@@ -245,13 +245,38 @@ function removeOperandTail(operand){
 }
 
 function operationsEvaluator(operations){
-    return _.reduce(function(prev, curr){
-        return (
-            isEvaluate(curr)
-            ? [...evaluateExpression(prev)]
-            : [...prev, curr]
-        );
-    })([])(operations);
+    return _.flow([
+        _.reduce(function(prev, curr){
+            return (
+                isEvaluate(curr)
+                ? [[...evaluateExpression(_.flatten(prev)), ...repeatOperation(_.flatten(prev))]]
+                : _.isArray(_.last(prev))
+                ? (
+                    isOperand(curr)
+                    ? [..._.dropRight(1)(prev), curr]
+                    : [_.first(_.last(prev)), curr]
+                )
+                : [...prev, curr]
+            );
+        })([]),
+        _.map(function(curr){
+            return (
+                _.isArray(curr)
+                ? _.first(curr)
+                : curr
+            );
+        })
+    ])(operations);
+}
+
+function repeatOperation(inputs){
+    const lastInput = _.last(inputs);
+    const secondLastInput = _.last(_.dropRight(1)(inputs));
+    return (
+        isOperand(lastInput) && isBinaryOp(secondLastInput)
+        ? [secondLastInput, lastInput]
+        : []
+    );
 }
 
 function evaluateExpression(expression){
