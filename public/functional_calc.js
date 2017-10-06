@@ -22,17 +22,17 @@ function calculate(inputs){
 //     ])(inputs);
 // }
 
-function inputsReducer(prev, curr){
+function inputsReducer(acc, curr){
     return (
         isOperand(curr)
-        ? operandReducer(curr)(prev)
+        ? operandReducer(curr)(acc)
         // isOperator(curr)
-        // ? operatorReducer(curr)(prev)
+        // ? operatorReducer(curr)(acc)
         // : isGroupBoundary(curr)
-        // ? groupBoundaryReducer(curr)(prev)
+        // ? groupBoundaryReducer(curr)(acc)
         // : isEquality(curr)
-        // ? equalityReducer(curr)(prev)
-        : [...prev, curr]
+        // ? equalityReducer(curr)(acc)
+        : [...acc, curr]
     );
 }
 
@@ -86,9 +86,9 @@ function operandInputPairReducer(curr){
             ? [`0${curr}`]
             : inputHas(isDecimal)(prev)
             ? [prev]
-            : !isNumber(prev)
-            ? [prev, `0${curr}`]
-            : [prev + curr]
+            : isOperand(prev)
+            ? [prev + curr]
+            : [prev, `0${curr}`]
         );
     }
 
@@ -98,15 +98,16 @@ function operandInputPairReducer(curr){
             ? [curr]
             : isImpliedOperation(prev)
             ? [curr]
-            : `${prev}` === "0"
+            : isPositiveZero(prev)
             ? [curr]
-            : isNumber(prev) && inputHas(isDecimal)(prev)
-            ? [prev + _.flow([
-                _.split("."),
-                _.join("")
-            ])(curr)]
-            : isNumber(prev)
-            ? [prev + curr]
+            : isNegativeZero(prev)
+            ? [`-${curr}`]
+            : isOperand(prev)
+            ? (
+                inputHas(isDecimal)(prev)
+                ? [prev + inputReject(isDecimal)(curr)]
+                : [prev + curr]
+            )
             : [prev, curr]
         );
     }
@@ -411,11 +412,17 @@ function isDecimal(input){
 
 function inputHas(test){
     return function(input){
+        return _.some(test)(input);
+    };
+}
+
+function inputReject(test){
+    return function(input){
         return _.flow([
-            _.split(""),
-            _.some(test)
+            _.reject(test),
+            _.join("")
         ])(input);
-    }
+    };
 }
 
 function isOperand(input){
@@ -427,7 +434,15 @@ function isNumber(input){
 }
 
 function isZero(input){
-    return _.includes(input)(['0', '-0'])
+    return isPositiveZero(input) || isNegativeZero(input);
+}
+
+function isPositiveZero(input){
+    return _.includes(input)(['0']);
+}
+
+function isNegativeZero(input){
+    return _.includes(input)(['-0']);
 }
 
 function isBinaryOp(input){
