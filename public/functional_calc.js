@@ -2,26 +2,56 @@
 if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
     var _ = _ || require("lodash/fp");
     module.exports = {
-        reduce: inputsReducer,
+        // reduce: inputsReducer,
         calculate: calculate
     };
 }
 
 function calculate(inputs){
     return _.flow([
-        inputsReducer,
-        operationsEvaluator
+        _.reduce(inputsReducer)([]),
+        _.map(removeImpliedOpsMap),
+        emptyReducer
     ])(inputs);
 }
 
-function inputsReducer(inputs){
-    return _.flow([
-        reduceInputsByPairs(operandReducer),
-        reduceInputsByPairs(operatorReducer),
-        reduceInputsByPairs(groupReducer),
-        groupBalancer,
-        emptyReducer
-    ])(inputs);
+// function calculate(inputs){
+//     return _.flow([
+//         inputsReducer,
+//         operationsEvaluator
+//     ])(inputs);
+// }
+
+function inputsReducer(prev, curr){
+    return (
+        isOperand(curr)
+        ? operandReducer(curr)(prev)
+        // isOperator(curr)
+        // ? operatorReducer(curr)(prev)
+        // : isGroupBoundary(curr)
+        // ? groupBoundaryReducer(curr)(prev)
+        // : isEquality(curr)
+        // ? equalityReducer(curr)(prev)
+        : [...prev, curr]
+    );
+}
+
+// function inputsReducer(inputs){
+//     return _.flow([
+//         reduceInputsByPairs(operandReducer),
+//         reduceInputsByPairs(operatorReducer),
+//         reduceInputsByPairs(groupReducer),
+//         groupBalancer,
+//         emptyReducer
+//     ])(inputs);
+// }
+
+function removeImpliedOpsMap(input){
+    return (
+        _.isArray(input)
+        ? _.first(input)
+        : input
+    );
 }
 
 function reduceInputsByPairs(reducer){
@@ -34,33 +64,43 @@ function reduceInputsByPairs(reducer){
 }
 
 function operandReducer(curr){
+    return function(prev){
+        return reduceInputsByPairs(operandInputPairReducer)([...prev, curr]);
+    }
+}
+
+function operandInputPairReducer(curr){
     return (
         isDecimal(curr)
-        ? decimalReducer
+        ? decimalInputPairReducer
         : isNumber(curr)
-        ? numberReducer
-        : nonOperandReducer
+        ? numberInputPairReducer
+        : defaultOperandInputPairReducer
     );
 
-    function decimalReducer(prev){
+    function decimalInputPairReducer(prev){
         return (
             _.isUndefined(prev)
             ? [`0${curr}`]
+            : isImpliedOperation(prev)
+            ? [`0${curr}`]
+            : inputHas(isDecimal)(prev)
+            ? [prev]
             : !isNumber(prev)
             ? [prev, `0${curr}`]
-            : hasDecimal(prev)
-            ? [prev]
             : [prev + curr]
         );
     }
 
-    function numberReducer(prev){
+    function numberInputPairReducer(prev){
         return (
             _.isUndefined(prev)
             ? [curr]
+            : isImpliedOperation(prev)
+            ? [curr]
             : `${prev}` === "0"
             ? [curr]
-            : isNumber(prev) && hasDecimal(prev)
+            : isNumber(prev) && inputHas(isDecimal)(prev)
             ? [prev + _.flow([
                 _.split("."),
                 _.join("")
@@ -71,12 +111,12 @@ function operandReducer(curr){
         );
     }
 
-    function nonOperandReducer(prev){
+    function defaultOperandInputPairReducer(prev){
         return (
             _.isUndefined(prev)
             ? [curr]
-            : isNumber(prev)
-            ? [removeOperandTail(prev), curr]
+            // : isNumber(prev)
+            // ? [removeOperandTail(prev), curr]
             : [prev, curr]
         );
     }
@@ -365,20 +405,29 @@ function evaluateSingleOperation(operator){
     }
 }
 
-function isDecimal(operation){
-    return operation.length === 1 && hasDecimal(operation);
+function isDecimal(input){
+    return _.includes(input)(["."]);
 }
 
-function hasDecimal(operation){
-    return /\./.test(operation);
+function inputHas(test){
+    return function(input){
+        return _.flow([
+            _.split(""),
+            _.some(test)
+        ])(input);
+    }
 }
 
 function isOperand(input){
-    return isNumber(input);
+    return isNumber(input) || isDecimal(input);
 }
 
 function isNumber(input){
     return !isNaN(input);
+}
+
+function isZero(input){
+    return _.includes(input)(['0', '-0'])
 }
 
 function isBinaryOp(input){
@@ -427,4 +476,8 @@ function isGroupEnd(input){
 
 function isEvaluate(input){
     return _.includes(input)(["="]);
+}
+
+function isImpliedOperation(input){
+    return _.isArray(input);
 }

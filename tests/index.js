@@ -14,7 +14,7 @@ let tests;
 
 console.log("\n===== REDUCTION TESTS =====\n");
 
-unit = require("../public/functional_calc").reduce;
+unit = require("../public/functional_calc").calculate;
 tests = require('./reductions.json');
 unitTests(unit)(tests);
 
