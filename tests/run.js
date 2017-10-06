@@ -1,6 +1,7 @@
 "use strict";
 const flow = require("lodash/fp/flow");
 const map = require("lodash/fp/map");
+const reduce = require("lodash/fp/reduce");
 const cloneExtend = require("./utils").cloneExtend;
 const assign = require("lodash/fp/assign");
 const isEqual = require("lodash/fp/isEqual");
@@ -13,7 +14,9 @@ function runTests(testFunction){
 
     function testOutputMap(test){
         return flow([
-            testFunction,
+            reduce(function(acc, curr){
+                return testFunction([...acc, curr]);
+            })(testFunction([])),
             cloneExtend(test)("output")
         ])(test.input);
     }
