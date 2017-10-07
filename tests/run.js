@@ -6,6 +6,8 @@ const cloneExtend = require("./utils").cloneExtend;
 const assign = require("lodash/fp/assign");
 const isEqual = require("lodash/fp/isEqual");
 const isEmpty = require("lodash/fp/isEmpty");
+const isArray = require("lodash/fp/isArray");
+const first = require("lodash/fp/first");
 
 function runTests(testFunction){
     return flow([
@@ -22,9 +24,20 @@ function runTests(testFunction){
                     return testFunction([...acc, curr]);
                 })([])
             ),
+            removeImpliedOps,
             cloneExtend(test)("output")
         ])(test.input);
     }
+}
+
+function removeImpliedOps(output){
+    return map(function(op){
+        return (
+            isArray(op)
+            ? first(op)
+            : op
+        )
+    })(output);
 }
 
 function testStatusMap(test){

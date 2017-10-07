@@ -13,13 +13,6 @@ function calculate(inputs){
     ])(inputs);
 }
 
-// function calculate(inputs){
-//     return _.flow([
-//         inputsReducer,
-//         operationsEvaluator
-//     ])(inputs);
-// }
-
 function inputsReducer(acc, curr){
     return (
         isOperand(curr)
@@ -28,8 +21,8 @@ function inputsReducer(acc, curr){
         ? operatorReducer(curr)(acc)
         : isGroupBoundary(curr)
         ? groupBoundaryReducer(curr)(acc)
-        // : isEquality(curr)
-        // ? equalityReducer(curr)(acc)
+        : isEvaluate(curr)
+        ? evaluateReducer(curr)(acc)
         : [...acc, curr]
     );
 }
@@ -215,6 +208,15 @@ function groupBoundaryReducer(curr){
     }
 }
 
+function evaluateReducer(curr){
+    return function(acc){
+        return [[
+            ...evaluateExpression(groupCeilingReducer(_.flatten(acc))),
+            ...repeatOperation(_.flatten(acc))
+        ]];
+    };
+}
+
 function groupCeilingReducer(inputs){
     return [
         ...inputs,
@@ -239,31 +241,6 @@ function removeOperandTail(operand){
         Number,
         String
     ])(operand);
-}
-
-function operationsEvaluator(operations){
-    return _.flow([
-        _.reduce(function(prev, curr){
-            return (
-                isEvaluate(curr)
-                ? [[...evaluateExpression(_.flatten(prev)), ...repeatOperation(_.flatten(prev))]]
-                : _.isArray(_.last(prev))
-                ? (
-                    isOperand(curr)
-                    ? [..._.dropRight(1)(prev), curr]
-                    : [_.first(_.last(prev)), curr]
-                )
-                : [...prev, curr]
-            );
-        })([]),
-        _.map(function(curr){
-            return (
-                _.isArray(curr)
-                ? _.first(curr)
-                : curr
-            );
-        })
-    ])(operations);
 }
 
 function repeatOperation(inputs){
