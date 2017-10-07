@@ -5,6 +5,7 @@ const reduce = require("lodash/fp/reduce");
 const cloneExtend = require("./utils").cloneExtend;
 const assign = require("lodash/fp/assign");
 const isEqual = require("lodash/fp/isEqual");
+const isEmpty = require("lodash/fp/isEmpty");
 
 function runTests(testFunction){
     return flow([
@@ -14,9 +15,13 @@ function runTests(testFunction){
 
     function testOutputMap(test){
         return flow([
-            reduce(function(acc, curr){
-                return testFunction([...acc, curr]);
-            })(testFunction([])),
+            (
+                isEmpty(test.input)
+                ? testFunction
+                : reduce(function(acc, curr){
+                    return testFunction([...acc, curr]);
+                })([])
+            ),
             cloneExtend(test)("output")
         ])(test.input);
     }

@@ -8,8 +8,8 @@ if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
 
 function calculate(inputs){
     return _.flow([
-        _.reduce(inputsReducer)([]),
-        emptyReducer
+        emptyInputsReducer,
+        _.reduce(inputsReducer)([])
     ])(inputs);
 }
 
@@ -272,11 +272,11 @@ function groupCeilingReducer(inputs){
     ];
 }
 
-function emptyReducer(inputs){
+function emptyInputsReducer(inputs){
     return (
-        _.size(inputs)
-        ? inputs
-        : ["0"]
+        _.isEmpty(inputs)
+        ? ["0"]
+        : inputs
     );
 }
 
