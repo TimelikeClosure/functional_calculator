@@ -2,7 +2,6 @@
 if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
     var _ = _ || require("lodash/fp");
     module.exports = {
-        // reduce: inputsReducer,
         calculate: calculate
     };
 }
@@ -10,7 +9,6 @@ if (!(this.hasOwnProperty('Window') && this instanceof Window) && module){
 function calculate(inputs){
     return _.flow([
         _.reduce(inputsReducer)([]),
-        _.map(removeImpliedOpsMap),
         emptyReducer
     ])(inputs);
 }
@@ -26,8 +24,8 @@ function inputsReducer(acc, curr){
     return (
         isOperand(curr)
         ? operandReducer(curr)(acc)
-        // isOperator(curr)
-        // ? operatorReducer(curr)(acc)
+        : isOperator(curr)
+        ? operatorReducer(curr)(acc)
         // : isGroupBoundary(curr)
         // ? groupBoundaryReducer(curr)(acc)
         // : isEquality(curr)
@@ -116,43 +114,51 @@ function operandInputPairReducer(curr){
         return (
             _.isUndefined(prev)
             ? [curr]
-            // : isNumber(prev)
-            // ? [removeOperandTail(prev), curr]
             : [prev, curr]
         );
     }
 }
 
 function operatorReducer(curr){
+    return function(prev){
+        return reduceInputsByPairs(operatorInputPairReducer)([...prev, curr]);
+    }
+}
+
+function operatorInputPairReducer(curr){
     return (
+        // isUnaryOp(curr)
+        // ? unaryOperatorInputPairReducer
         isBinaryOp(curr)
-        ? binaryOperatorReducer
-        : isUnaryOp(curr)
-        ? unaryOperatorReducer
-        : nonOperatorReducer
+        ? binaryOperatorInputPairReducer
+        : defaultOperatorInputPairReducer
     );
 
-    function binaryOperatorReducer(prev){
+    function binaryOperatorInputPairReducer(prev){
         return (
             _.isUndefined(prev)
-            ? ["0", curr]
+            ? [...calculate([]), curr]
+            : isOperand(prev)
+            ? [removeOperandTail(prev), curr]
+            : isImpliedOperation(prev)
+            ? [removeImpliedOpsMap(prev), curr]
             : isGroupStart(prev)
-            ? [prev, "0", curr]
+            ? [prev, ...calculate([]), curr]
             : isBinaryOp(prev)
             ? [curr]
             : [prev, curr]
         );
     }
 
-    function unaryOperatorReducer(prev){
+    function unaryOperatorInputPairReducer(prev){
         return (
             _.isUndefined(prev)
-            ? ["0", curr]
+            ? [...calculate([]), curr]
             : [prev, curr]
         );
     }
 
-    function nonOperatorReducer(prev){
+    function defaultOperatorInputPairReducer(prev){
         return (
             _.isUndefined(prev)
             ? [curr]
@@ -443,6 +449,10 @@ function isPositiveZero(input){
 
 function isNegativeZero(input){
     return _.includes(input)(['-0']);
+}
+
+function isOperator(input){
+    return isUnaryOp(input) || isBinaryOp(input);
 }
 
 function isBinaryOp(input){
