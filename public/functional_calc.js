@@ -26,23 +26,13 @@ function inputsReducer(acc, curr){
         ? operandReducer(curr)(acc)
         : isOperator(curr)
         ? operatorReducer(curr)(acc)
-        // : isGroupBoundary(curr)
-        // ? groupBoundaryReducer(curr)(acc)
+        : isGroupBoundary(curr)
+        ? groupBoundaryReducer(curr)(acc)
         // : isEquality(curr)
         // ? equalityReducer(curr)(acc)
         : [...acc, curr]
     );
 }
-
-// function inputsReducer(inputs){
-//     return _.flow([
-//         reduceInputsByPairs(operandReducer),
-//         reduceInputsByPairs(operatorReducer),
-//         reduceInputsByPairs(groupReducer),
-//         groupBalancer,
-//         emptyReducer
-//     ])(inputs);
-// }
 
 function removeImpliedOpsMap(input){
     return (
@@ -52,18 +42,18 @@ function removeImpliedOpsMap(input){
     );
 }
 
-function reduceInputsByPairs(reducer){
-    return _.reduce(function(prev, curr){
+function reduceInputsLastPair(reducer){
+    return function(inputs){
         return [
-            ...(_.dropRight(1)(prev)),
-            ...(reducer(curr)(_.last(prev)))
+            ...(_.dropRight(2)(inputs)),
+            ...reducer(_.last(inputs))(_.last(_.dropRight(1)(inputs)))
         ];
-    })([]);
+    };
 }
 
 function operandReducer(curr){
-    return function(prev){
-        return reduceInputsByPairs(operandInputPairReducer)([...prev, curr]);
+    return function(acc){
+        return reduceInputsLastPair(operandInputPairReducer)([...acc, curr]);
     }
 }
 
@@ -86,6 +76,8 @@ function operandInputPairReducer(curr){
             ? [prev]
             : isOperand(prev)
             ? [prev + curr]
+            : isGroupEnd(prev)
+            ? [prev, "*", `0${curr}`]
             : [prev, `0${curr}`]
         );
     }
@@ -106,6 +98,8 @@ function operandInputPairReducer(curr){
                 ? [prev + inputReject(isDecimal)(curr)]
                 : [prev + curr]
             )
+            : isGroupEnd(prev)
+            ? [prev, "*", curr]
             : [prev, curr]
         );
     }
@@ -121,7 +115,7 @@ function operandInputPairReducer(curr){
 
 function operatorReducer(curr){
     return function(prev){
-        return reduceInputsByPairs(operatorInputPairReducer)([...prev, curr]);
+        return reduceInputsLastPair(operatorInputPairReducer)([...prev, curr]);
     }
 }
 
@@ -167,102 +161,58 @@ function operatorInputPairReducer(curr){
     }
 }
 
-function groupReducer(curr){
+function groupBoundaryReducer(curr){
     return (
         isGroupStart(curr)
         ? groupStartReducer
         : isGroupEnd(curr)
         ? groupEndReducer
-        : isOperand(curr)
-        ? operandReducer
-        : nonGroupReducer
+        : defaultGroupReducer
     );
 
-    function groupStartReducer(prev){
+    function groupStartReducer(acc){
+        return reduceInputsLastPair(groupStartInputPairReducer)([...acc, curr])
+    }
+
+    function groupStartInputPairReducer(curr){
+        return function(prev){
+            return (
+                _.isUndefined(prev)
+                ? [curr]
+                : isOperand(prev)
+                ? [prev, "*", curr]
+                : isGroupEnd(prev)
+                ? [prev, "*", curr]
+                : [prev, curr]
+            );
+        }
+    }
+
+    function groupEndReducer(acc){
         return (
-            _.isUndefined(prev)
-            ? [curr]
-            : isOperand(prev) || isGroupEnd(prev)
-            ? [prev, "*", curr]
-            : [prev, curr]
+            groupDepth(acc) === 0
+            ? reduceInputsLastPair(groupEndInputPairReducer)(["(", ...acc, curr])
+            : reduceInputsLastPair(groupEndInputPairReducer)([...acc, curr])
         );
     }
 
-    function groupEndReducer(prev){
-        return (
-            _.isUndefined(prev)
-            ? [curr]
-            : isGroupStart(prev)
-            ? [prev, "0", curr]
-            : isBinaryOp(prev)
-            ? [prev, "0", curr]
-            : [prev, curr]
-        );
+    function groupEndInputPairReducer(curr){
+        return function(prev){
+            return (
+                _.isUndefined(prev)
+                ? [curr]
+                : isGroupStart(prev)
+                ? [prev, "0", curr]
+                : isBinaryOp(prev)
+                ? [prev, "0", curr]
+                : [prev, curr]
+            );
+        }
     }
 
-    function operandReducer(prev){
-        return (
-            _.isUndefined(prev)
-            ? [curr]
-            : isGroupEnd(prev)
-            ? [prev, "*", curr]
-            : [prev, curr]
-        );
+    function defaultGroupReducer(acc){
+        return [...acc, curr];
     }
-
-    function nonGroupReducer(prev){
-        return (
-            _.isUndefined(prev)
-            ? [curr]
-            : [prev, curr]
-        );
-    }
-}
-
-function groupBalancer(inputs){
-    return _.flow([
-        groupByDelimiters(["="]),
-        _.reduce((prev, curr) => (
-            _.isArray(curr)
-            ? [...prev, groupFloorReducer(curr)]
-            : isEvaluate(curr)
-            ? [
-                ...(_.dropRight(1)(prev)),
-                groupCeilingReducer(_.last(prev)),
-                curr
-            ]
-            : [...prev, curr]
-        ))([]),
-        _.flatten
-    ])(inputs);
-}
-
-function groupByDelimiters(delimiters){
-    return _.reduce(function(prev, curr){
-        return (
-            _.includes(curr)(delimiters)
-            ? [
-                ..._.cloneDeep(prev),
-                curr,
-                []
-            ]
-            : [
-                ...(_.dropRight(1)(_.cloneDeep(prev))),
-                [
-                    ...(_.last(prev)),
-                    curr
-                ]
-            ]
-        );
-    })([[]]);
-}
-
-function groupFloorReducer(inputs){
-    return _.reduce((prev, curr) => (
-        curr === ")" && groupDepth(prev) === 0
-        ? ["(", ...prev, curr]
-        : [...prev, curr]
-    ))([])(inputs);
 }
 
 function groupCeilingReducer(inputs){
