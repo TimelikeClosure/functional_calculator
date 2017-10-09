@@ -72,6 +72,24 @@
         }
     },
     "operators": {
+        "unary": {
+            "single": {
+                "input": ["1", "^2"],
+                "expected": ["1", "^2"]
+            },
+            "multiple": {
+                "input": ["1", "^2", "^(1/2)"],
+                "expected": ["1", "^2", "^(1/2)"]
+            },
+            "no_operand": {
+                "input": ["^2"],
+                "expected": ["0", "^2"]
+            },
+            "trailing_decimal_operand": {
+                "input": ["1.", "^2"],
+                "expected": ["1", "^2"]
+            }
+        },
         "binary": {
             "single": {
                 "input": "1+2",
